@@ -1,0 +1,122 @@
+---
+title: "Homework Week2"
+author: "Wanghuizi Gao"
+date: "August 17, 2018"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(vcd)
+library(vcdExtra)
+library(xtable)
+
+#Exercise 2.3.
+#(a)	Find the total number of cases contained in this table.
+#Answer: 4526
+str(UCBAdmissions)
+summary(UCBAdmissions)
+sum(UCBAdmissions)
+
+#(b)	For each department, find the total number of applicants.
+#Answer:  A:933, B:585, C:918, D:792, E:584, F:714
+xtabs(Freq ~ Dept, data=UCBAdmissions)
+
+#(c)	For each department, find the overall proportion of applicants who were admitted.
+#Answer: A:34.2%, B:21.1%, C:18.3%, D:15.3%, E:8.4%, F:2.6%
+table_deptad <- xtabs(Freq ~ Dept+Admit, data=UCBAdmissions)
+prop.table(table_deptad, 2)
+
+#(d)	Construct a tabular display of department (rows) and gender (columns), 
+#showing the proportion of applicants in each cell who were admitted relative 
+#to the total applicants in that cell.
+table_deptgead1 <- xtabs(Freq ~ Dept+Gender+Admit, data=UCBAdmissions)
+(table_deptgead2 <- ftable(table_deptgead1))
+(prtable_deptgead <- prop.table(table_deptgead2, 1))
+(prop <- matrix(prtable_deptgead[ ,1], 6, 2, byrow=TRUE))
+dimnames(prop) =list( Dept = c("A", "B", "C", "D", "E", "F"), Gender = c("Male", "Female"))
+(proptable <- as.table(prop))
+```
+```{r}
+#Exercise 2.5.
+#(a)	Verify that the total number of games represented in this table is 380.
+data(UKSoccer, package="vcd")
+str(UKSoccer)
+summary(UKSoccer)
+sum(UKSoccer)
+
+#(b)	Find the marginal total of the number of goals scored by each of the home and away teams.
+#Answer:
+#Home teams: 0-goal:76 times, 1-goal:142 times, 2-goal:90 times, 3-goal:45 times, 4-goal:27 times
+#Away teams: 0-goal:140 times, 1-goal:136 times, 2-goal:55 times, 3-goal:38 times, 4-goal:11 times
+addmargins(UKSoccer)
+
+#(c)	Express each of the marginal totals as proportions.
+#Answer:
+#Home teams: 0-goal:20%, 1-goal:37.4%, 2-goal:23.7%, 3-goal:11.8%, 4-goal:7.1%
+#Away teams: 0-goal:36.8%, 1-goal:35.8%, 2-goal:14.5%, 3-goal:10%, 4-goal:2.9%
+ftable(UKSoccer)
+margin.table(UKSoccer, 1)
+prop.table(margin.table(UKSoccer, 1))
+margin.table(UKSoccer, 2)
+prop.table(margin.table(UKSoccer, 2))
+
+#(d)	Comment on the distribution of the numbers of home-team and away-team goals. 
+#Is there any evidence that home teams score more goals on average?
+(table_home <- margin.table(UKSoccer, 1))
+barplot(table_home, main = "Bar Plot on Frequency of the Numbers of Home-team Goals", 
+        col = "#CCCCFF", ylim = c(0,160), xlab = "Number of Home-team Goals", ylab = "Frequency")
+#Answer: The distribution of the numbers of home-team goals is right skewed. The mode is 1. 
+#The frequency of home-team 0-goal is about 80. The frequency of home-team 4-goal is about 30.
+(table_away <- margin.table(UKSoccer, 2))
+barplot(table_away, main = "Bar Plot on Frequency of the Numbers of Away-team Goals", 
+        col = "#CCCCFF", ylim = c(0,160), xlab = "Number of Away-team Goals", ylab = "Frequency")
+#Answer: The distribution of the numbers of home-team goals is right skewed. The mode is 0. 
+#The frequency of away-team 0-goal is about 140 which is much higher than that of home-team 0-goal. 
+#The frequency of away-team 4-goal is only about 10 which is smaller than that of home-team 4-goal.
+margin.table(UKSoccer, 1)
+(home_goal <- rbind(margin.table(UKSoccer, 1), c(0*76, 1*142, 2*90, 3*45, 4*27)))
+(ave_home <- sum(home_goal[2, ])/ 380)
+margin.table(UKSoccer, 2)
+(away_goal <- rbind(margin.table(UKSoccer, 2), c(0*140, 1*136, 2*55, 3*38, 4*11)))
+(ave_away <- sum(away_goal[2, ])/ 380)
+#Answer: The average of the number of home-team goals per game is 1.487. The average of the 
+#number of away-team goals per game is 1.063. The one of home-team goals is higher than that 
+#of away-team goals. It indicates that the home teams score more goals on average than away teams.
+```
+```{r}
+#Exercise 2.7.
+#(a)	Try this the long way: convert UCBAdmissions to a data frame (as.data.frame()), 
+#manipulate the factors (e.g., interaction()), then convert back to a table (as.data.frame()).
+df_UCBAdmissions1 <- as.data.frame(UCBAdmissions)
+(AdmitGender <- interaction(df_UCBAdmissions1$Admit, df_UCBAdmissions1$Gender))
+(Dept <- df_UCBAdmissions1$Dept)
+(Freq <- df_UCBAdmissions1$Freq)
+(UCB.tab <- matrix(Freq, 4, 6))
+dimnames(UCB.tab) = list(AdmitGender = c("Admitted.Male", "Rejected.Male", "Admitted.Female",
+                            "Rejected.Female"), Dept = c("A", "B", "C", "D", "E", "F"))
+UCB.tab2 <- as.table(UCB.tab)
+UCB.tab2
+
+#(b)	Try this the short way: both ftable() and structable() have as.matrix() methods 
+#that convert their result to a matrix.
+ftable(UCBAdmissions)
+structable(~ Admit+Dept+Gender, data = UCBAdmissions)
+```
+```{r}
+#Exercise 2.8.
+data(VisualAcuity, package = "vcd")
+str(VisualAcuity)
+#(a)	From this, use xtabs() to create two 4 × 4 frequency tables, one for each gender.
+xtabs(Freq~right+left+gender, data=VisualAcuity)
+
+#(b)	Use structable() to create a nicely organized tabular display.
+VisualAcuity_freq <- xtabs(Freq~left+gender+right, data=VisualAcuity)
+structable(VisualAcuity_freq)
+
+#(c)	Use xtable() to create a LATEX or HTML table.
+VisualAcuity_latex <- as.data.frame(VisualAcuity)
+print(xtable(VisualAcuity_latex), include.rownames=FALSE, include.colnames=TRUE)
+```
+
