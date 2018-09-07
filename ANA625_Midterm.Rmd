@@ -1,0 +1,41 @@
+---
+title: "ANA625_Midterm"
+author: "Wanghuizi Gao"
+date: "August 18, 2018"
+output: pdf_document
+---
+```{r}
+library(vcd)
+library(vcdExtra)
+data(DanishWelfare, package = "vcd")
+class(DanishWelfare)
+str(DanishWelfare)
+
+#1.	Find the total number of cases represented in this table.
+#Answer: The total number of cases is 5144.
+sum(DanishWelfare$Freq)
+
+#2.	In this form, the variables Alcohol and Income should arguably be considered 
+#ordered factors. Change them to make them ordered.
+levels(DanishWelfare$Alcohol)
+DanishWelfare$Alcohol <- ordered(DanishWelfare$Alcohol, levels=c("<1", "1-2", ">2"))
+levels(DanishWelfare$Income)
+DanishWelfare$Income <- ordered(DanishWelfare$Income, levels=c("0-50", "50-100", 
+   "100-150", ">150"))
+DanishWelfare[order(DanishWelfare$Alcohol,DanishWelfare$Income),]
+
+#3.	Convert this data frame to table form, DanishWelfare.tab, a 4-way array containing
+#the frequencies with appropriate variable names and level names.
+DanishWelfare.tab <- ftable(xtabs(Freq ~DanishWelfare$Urban+ DanishWelfare$Status+
+          DanishWelfare$Income+DanishWelfare$Alcohol , data = DanishWelfare))
+DanishWelfare.tab
+
+#4.	The variable Urban has 5 categories. Find the total frequencies in each of these. 
+#How would you collapse the table to have only two categories, City, Non-city?
+DanishWelfare_Urban1 <- xtabs(Freq~Urban, data = DanishWelfare)
+DanishWelfare_Urban1
+DanishWelfare_Urban2 <- collapse.table(DanishWelfare_Urban1, Urban=c("Non-city", 
+    "Non-city", "City", "City", "Non-city"))
+DanishWelfare_Urban2
+```
+
