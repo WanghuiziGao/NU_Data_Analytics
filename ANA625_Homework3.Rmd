@@ -1,0 +1,197 @@
+---
+title: "Homework Week3"
+author: "Wanghuizi Gao"
+date: "August 23, 2018"
+output: pdf_document
+---
+```{r}
+# Exercise 3.3
+# (a) Produce plots analogous to those shown in Section 3.1 (some sort of bar graph of frequencies).
+library(HistData)
+library(vcd)
+library(grid)
+data(WomenQueue)
+str(WomenQueue)
+barplot(WomenQueue, main = "Bar Plot of Frequency of Women Queue", xlab="Number of Women",
+        ylab="Frequency", col="lightblue")
+
+# (b) Check for goodness-of-fit to the binomial distribution using the goodfit () methods 
+# described in Section 3.3.2.
+WomenQueue.fit1 <- goodfit(WomenQueue, type="binomial")
+WomenQueue.fit1$par
+summary(WomenQueue.fit1)
+# The p-value 0.37 is larger than 0.05, which indicates an acceptable fit for binomial distribution.
+
+# (c) Make a reasonable plot showing departure from the binomial distribution.
+plot(WomenQueue.fit1, main = "Hanging Rootogram of WomenQueue-Binomial Dist", 
+     xlab="Number of Women", type = "hanging", shade = T)
+
+# (d) Suggest some reasons why the number of women in queues of length 10 might depart 
+# from a binomial distribution, Bin(n = 10, p = 1/2).
+# The deviation rootogram shows the difference between observed value and the binomial 
+# distribution value for the number of women in queues of length 10.
+# Possiable reasons:
+# 1. The sample size is not big enough to represent the real distribution.
+# 2. The likelihood of females and males in queue are not same, 
+# making the probability of female not equal to 1/2. 
+# 3. The real distribution may be not binomial distribution.
+WomenQueue.fit2 <- goodfit(WomenQueue, type = "binomial", par = list(prob = .5, size = 10))
+plot(WomenQueue.fit2, main = "Deviation Rootogram-Binomial Dist Bin(n=10,p=0.5)", 
+     xlab="Number of Women", type = "deviation", shade = T)
+```
+```{r}
+# Exercise 3.1 
+# (a) Make a plot of Ratio over Year, similar to Figure 3.1. What features stand out? 
+# Which plot do you prefer to display the tendency for more male births?
+data(Arbuthnot)
+with(Arbuthnot, {
+  plot(Year, Ratio, type='b', ylim = c(1, 1.16), main = "Scatter Plot of Arbuthnot Birth Ratio", 
+       ylab = "Ratio (Male Births over Female Births)")
+  abline(h=1, col="red", lwd=2)
+  text(x=1640, y=1, expression(H[0]: "Ratio = 1"), pos=3, col="red")
+  abline(h=mean(Ratio), col="#CCCCFF", lwd=2)
+  text(x=1699, y=1.15, "------ Mean of Ratio", pos=3, col="#CCCCFF")
+  Arb.smooth <- loess.smooth(Year,Ratio)
+  lines(Arb.smooth$x, Arb.smooth$y, col="light blue", lwd=2)
+  text(x=1699, y=1.13, "------ Curve of Ratio", pos=3, col="light blue")
+  abline(lm(Arbuthnot$Ratio ~ Arbuthnot$Year), lwd=2,col="blue")
+  text(x=1699, y=1.11, "------ Trend of Ratio", pos=3, col="blue")
+})
+# Answer: 
+# Seeing from the scatter plot, the values of all data points are higher than 1. 
+# The mean of Ratio is about 1.07. 
+# The number of male births is higher than that of female births.
+# Line plot is preferred to display the tendency for more male births. 
+# Although the trend of Ratio was decreasing during the time period of this dataset,
+# the value of Ratio is always higher than 1, which indicates more male births. 
+
+# (b) Plot the total number of christenings, Males + Females or Total (in 000s) over time. 
+# What unusual features do you see?
+with(Arbuthnot, {
+  plot(Year, Total, type='b', ylim = c(5, 17), main = "Scatter Plot of Arbuthnot Christening", 
+       ylab = "Total Number of Christenings(in 000s)")
+   abline(h=mean(Total), col="#CCCCFF", lwd=2)
+   text(x=1689, y=8, "------ Mean of Christenings", pos=3, col="#CCCCFF")
+   Arb.smooth <- loess.smooth(Year,Total)
+   lines(Arb.smooth$x, Arb.smooth$y, col="light blue", lwd=2)
+   text(x=1689, y=7, "------ Curve of Christenings", pos=3, col="light blue")
+   abline(lm(Arbuthnot$Total ~ Arbuthnot$Year), lwd=2,col="blue")
+   text(x=1689, y=6, "------ Trend of Christenings", pos=3, col="blue")
+})
+# Answer: 
+# The overall trend of total number of Christenings was increasing during the research time period.
+# From 1640 to 1650, the number of  Christenings was decreasing sharply to the lowest point.
+# From 1660 to 1665, the number of  Christenings was increasing sharply.
+# In the year of 1704, the number of  Christenings decreased a lot.
+# The mean of the number of  Christenings is higher than 11,000 during the research time period.
+# After 1670, the number of  Christenings was higher than the mean, and increased faster than before.
+```
+```{r}
+# Exercise 4.1
+fat <- matrix(c(6, 4, 2, 11), 2, 2)
+dimnames(fat) <- list(diet = c("LoChol", "HiChol"), disease = c("No", "Yes"))
+fat
+# (a) Use chisq.test(fat) to test for association between diet and disease. 
+# Is there any indication that this test may not be appropriate here?
+chisq.test(fat)
+# Test result: P-value is larger than 0.05, failing to reject H0. Diet and disease are independent.
+fat_expected = independence_table(fat)
+round(fat_expected, 1)
+# Answer: 
+# The fat dataset only has 23 observations which is very small, 
+# and may not approximate the Chi-Square distribution.
+# The expected frequency of LoChol level of diet for each level of disease is smaller than 5, 
+# making the chi-square test not appropriate.
+
+# (b) Use a fourfold display to test this association visually. Experiment with the different 
+# options for standardizing the margins, using the margin argument to fourfold (). What evidence 
+# is shown in different displays regarding whether the odds ratio differs significantly from 1?
+fourfold (fat, std = "margin", margin = c(1,2))
+# The area of each shaded quadrant shows the frequency, standardized to equate the margins 
+# for diet and disease. Since the four quadrants do not align and the confidence rings 
+# around each quadrant do not overlap, the odds ratio differs significantly from 1.
+
+fourfold (fat, std = "margin", margin = 1)
+# The data have been standardized to equate the margins for diet, but not for disease. 
+# Since the four quadrants do not align and the confidence rings around each quadrant do not 
+# overlap, the odds ratio differs significantly from 1.
+
+fourfold (fat, std = "margin", margin = 2)
+# The data have been standardized to equate the margins for disease, but not for diet. 
+# Since the four quadrants do not align and the confidence rings around each quadrant do not 
+# overlap, the odds ratio differs significantly from 1.
+
+# (c) oddsratio(fat, log = FALSE) will give you a numerical answer. 
+# How does this compare to your visual impression from fourfold displays?
+oddsratio(fat, log = FALSE)
+# The result shows that the odds ratio is 8.25, which is significantly different from 1. 
+# This result is in line with the visual impression from fourfold displays.
+
+# (d) With such a small sample, Fisher's exact test may be more reliable for statistical inference. 
+# Use fisher.test (fat), and compare these results to what you have observed before.
+fisher.test (fat)
+# Result of Fisher's exact test:
+# Odd Ratio is equal to 7.4. The diet and disease are significantly associated. 
+# The HiChol diet has more than 7 times likelihood than LoChol diet to get disease.
+# Comparing with results observed:
+# 1. The result of chi-square test is that the diet and disease are independent. 
+# This is not the same as the result of Fisher's exact test. 
+# 2. The fourfold displays result is in line with Fisher's exact test that the odds ratio 
+# is not equal to 1.
+# 3. The result of oddsratio function is different from the result of Fisher's exact test. 
+# But the difference is slight.
+
+# (e) Write a one-paragraph summary of your findings and conclusions for this data set
+# Answer: 
+# Chi-square test is not appropriate with small dataset. The expected frequency of each 
+# level should be at least 5. The fourfold display is a good way to visualize the 
+# relationship between two binary categorical variables as if 2*2 contingency table.
+# Comparing with the Chi-square test, the Fisher's exact test is more reliable 
+# when analyzing small sample dataset.
+# The diet and disease are significantly associated. The odd ratio is significantly different 
+# from 1. The HiChol diet has more than 7 times likelihood than LoChol diet to get disease.
+```
+```{r}
+# Exercise 4.5
+# (a) Try one or more of the following other functions for visualizing two-way contingency 
+# tables with this data: plot (), tile (), mosaic (), and spineplot (). [For all except 
+# spineplot (), it is useful to include the argument shade=TRUE].
+data(Hospital)
+plot(Hospital, shade=TRUE)
+assoc(Hospital, shade=TRUE, main = "Association Plot of Hospital")
+mosaic(Hospital, shade=TRUE, main = "Mosaic Plot of Hospital")
+spineplot(Hospital, main = "Spine Plot of Hospital")
+
+# (b) Comment on the differences among these displays for understanding the relation 
+# between visits and length of stay.
+# plot (): The result is a mosaic plot. Among three levels of visit qrequency (each column), 
+# the height of each box indicates the propotion of frequency for different level of length of stay.
+# For regular visit qrequency, 2-9 length of stay has largest propotion of frequency, 
+# and the 20+ length of stay has smallest propotion of frequency.
+# Based on the standardized residuals, a cell is shaded blue if it is taller than the other 
+# cells in the same row (over-represented). A cell is shaded red if it is shorter than the 
+# other cells in the same row (under-represented).
+# This plot usually emphasizes the large cells with bule color, while unusually small cells 
+# with red color are too small to visualize.
+
+# assoc (): In the association plot, the area of the box is proportional to the difference 
+# between the observed and expected frequencies (assuming no association). The excess observed 
+# counts are blue and above the line, while deficient counts are red and below the line.
+# Among regular visit qrequency, the expected cell count is less than the observed for the 
+# 2-9 length of stay group. The expected cell count is more than the observed for the 
+# 20+ length of stay group.
+# The p-value is smaller than 0.05 which indicates that there is association between 
+# visit frequency and the length of stay.
+
+# mosaic (): Quite similar with plot (). Among three levels of visit qrequency (each row), 
+# the length of each box indicates the propotion of frequency for different level of length of stay.
+# The interpretation is the same as plot ().
+# P-value is based on Chi-square test. In this plot, p-value is smaller than 0.05. We can draw 
+# a conclusion that the visit frequency and the length of stay are statistically associated.
+
+# spineplot (): shows the propotion among different length of stays for each level of visit frequency.
+# The frequency for less than monthly and never visit frequency are similar. 
+# For the regular visit frequency, the smaller length of stay has larger frequency.
+# Among the regular visit frequency, 2-9 length of stay occupies more than 60%.
+```
+
