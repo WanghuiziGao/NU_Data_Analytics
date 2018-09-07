@@ -1,0 +1,239 @@
+---
+title: "Explanatory Data Analysis on insurance Data"
+author: "Wanghuizi Gao"
+date: "August 9, 2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+```{r}
+########import data into R
+insurance <- read.csv(file.choose(),header=T) 
+
+########view the whole dataset
+str(insurance)
+#dependent variable: charges (numeric)
+#categorical independent variable: sex, smoker and region
+#numeric independent variable: age, bmi and children
+
+dim(insurance)
+#1338 rows, 7 columns
+
+View(insurance)
+
+summary(insurance)
+```
+```{r}
+########dependent variable
+dep_var <- insurance$charges
+
+summary(dep_var)
+
+####mode
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+mode <- getmode(dep_var)
+mode
+
+var(dep_var)
+
+sd(dep_var)
+
+diff(range(dep_var))
+
+IQR(dep_var)
+
+quantile(dep_var, seq(from = 0, to = 1, by = 0.2))
+
+####skewness and kurtosis
+library(moments)
+
+skewness(dep_var)
+
+kurtosis(dep_var)
+
+####graphs
+hist(dep_var, main = "Histogram of Insurance Charges", xlab = "Charges($)", 
+     col="#CCCCFF")
+#highly right skewed
+
+boxplot(dep_var, main = "Box Plot of Insurance Charges", ylab = "Charges($)", 
+        col="#CCCCFF")
+#several outliers with high charge value
+
+qqnorm(dep_var, main = "QQ Plot of Insurance Charges")
+qqline(dep_var)
+```
+```{r}
+########categorical independent variables
+####sex
+summary(insurance$sex)
+
+table(insurance$sex)
+sex_table <- table(insurance$sex)
+sex_pct <- prop.table(sex_table) * 100
+round(sex_pct, digits = 1)
+
+pie(sex_pct, main = "Pie Chart of Sex")
+
+barplot(sex_table, main = "Bar Chart of Sex", ylim = c(0, 700), ylab = "Frequency", 
+        xlab = "Sex", col = "#CCCCFF")
+
+####smoker
+summary(insurance$smoker)
+
+table(insurance$smoker)
+smoker_table <- table(insurance$smoker)
+smoker_pct <- prop.table(smoker_table) * 100
+round(smoker_pct, digits = 1)
+
+pie(smoker_pct, main = "Pie Chart of Smoker")
+
+barplot(smoker_table, main = "Bar Chart of Smoker", ylim = c(0, 1200), 
+        ylab = "Frequency", xlab = "Smoker", col = "#CCCCFF")
+
+####region
+summary(insurance$region)
+
+table(insurance$region)
+region_table <- table(insurance$region)
+region_pct <- prop.table(region_table) * 100
+round(region_pct, digits = 1)
+
+pie(region_pct, main = "Pie Chart of Region")
+
+barplot(region_table, main = "Bar Chart of Region", ylim = c(0, 400), 
+        ylab = "Frequency", xlab = "Region", col = "#CCCCFF")
+```
+```{r}
+########numeric independent variables
+####age
+summary(insurance$age)
+
+getmode(insurance$age)
+
+var(insurance$age)
+
+sd(insurance$age)
+
+diff(range(insurance$age))
+
+IQR(insurance$age)
+
+quantile(insurance$age, seq(from = 0, to = 1, by = 0.2))
+
+skewness(insurance$age)
+
+kurtosis(insurance$age)
+
+hist(insurance$age, main = "Histogram of Age", xlab = "Age", col="#CCCCFF", 
+     xlim = c(10,70), ylim = c(0,300), breaks = 5)
+
+plot(density(insurance$age), main = "Desity Plot of Age")
+
+boxplot(insurance$age, main = "Box Plot of Age", ylab = "Age", col="#CCCCFF")
+
+qqnorm(insurance$age, main = "QQ Plot of Age")
+qqline(insurance$age)
+
+####bmi
+summary(insurance$bmi)
+
+getmode(insurance$bmi)
+
+var(insurance$bmi)
+
+sd(insurance$bmi)
+
+diff(range(insurance$bmi))
+
+IQR(insurance$bmi)
+
+quantile(insurance$bmi, seq(from = 0, to = 1, by = 0.2))
+
+skewness(insurance$bmi)
+
+kurtosis(insurance$bmi)
+
+hist(insurance$bmi, main = "Histogram of BMI", xlab = "BMI", col="#CCCCFF", 
+     xlim = c(10,60), ylim = c(0,400))
+#right skewed
+
+plot(density(insurance$bmi), main = "Desity Plot of BMI")
+
+boxplot(insurance$bmi, main = "Box Plot of BMI", ylab = "BMI", col="#CCCCFF")
+#several outliers with high bmi value
+
+qqnorm(insurance$bmi, main = "QQ Plot of BMI")
+qqline(insurance$bmi)
+
+####children
+summary(insurance$children)
+
+getmode(insurance$children)
+
+var(insurance$children)
+
+sd(insurance$children)
+
+diff(range(insurance$children))
+
+IQR(insurance$children)
+
+quantile(insurance$children, seq(from = 0, to = 1, by = 0.2))
+
+skewness(insurance$children)
+
+kurtosis(insurance$children)
+
+hist(insurance$children, main = "Histogram of Children", xlab = "Children", 
+     col="#CCCCFF", xlim = c(0,5), ylim = c(0,600), breaks = 20)
+#most observations have 0 child
+
+plot(density(insurance$children), main = "Desity Plot of Children")
+
+boxplot(insurance$children, main = "Box Plot of Children", ylab = "Children", 
+        col="#CCCCFF")
+#several outliers with high bmi value
+
+qqnorm(insurance$children, main = "QQ Plot of Children")
+qqline(insurance$children)
+
+children_table <- table (insurance$children)
+barplot(children_table, main = "Bar Plot of Children", col="#CCCCFF", 
+        ylim = c(0,600), xlab = "Children", ylab = "frequency")
+```
+```{r}
+########relationship between variables
+####dependent variable vs independent variable
+boxplot(charges ~ sex, data=insurance, main = "Box Plot of Insurance Charges vs Sex", 
+        ylab = "Charges($)",col = "#CCCCFF")
+
+boxplot(charges ~ interaction(sex,smoker), data=insurance, 
+        main = "Box Plot of Insurance Charges vs Sex and Smoker", 
+        ylab = "Charges($)",col = "#CCCCFF")
+
+plot(insurance$bmi, dep_var, main ="Scatter Plot of Charges vs  BMI", 
+     ylab = "Charges($)", xlab = "BMI")
+abline(lm(dep_var ~ insurance$bmi), col = "blue")
+
+####scatterplot mathrix
+pairs(insurance[c("age", "bmi", "children", "charges")])
+
+library(psych)
+pairs.panels(insurance[c("age", "bmi", "children", "charges")])
+
+####correlation matrix
+cor(insurance[c("age", "bmi", "children", "charges")])
+#Among age, bmi and children, age has the highest correlation with charges.
+
+####dependent variable vs all independent variable
+ins_model <- lm(charges ~ ., data = insurance)
+summary(ins_model)
+```
+
