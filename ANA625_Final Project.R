@@ -48,12 +48,15 @@ colnames(conti_data) <- c("network_age", "total_revenue", "SMS_revenue", "data_r
 conti_data <- as.matrix(conti_data)
 options(scipen=999)  # turn-off scientific notation
 boxplot.matrix(conti_data, ylim = c(0, 40000), main = "Box Plot Matrix")
-boxplot(Aggregate_Data_Vol, xlab = "Data Volume", ylab = "Byte", main = "Box Plot of Data Volume")
+boxplot(Dataset$Aggregate_Data_Vol, xlab = "Data Volume", ylab = "Byte", main = "Box Plot of Data Volume")
+diff(range(Dataset$Aggregate_Data_Vol))
+var(Dataset$Aggregate_Data_Vol)
 # The scale of Aggregate_Data_Vol is much larger than others.
 
 # Correlation matrix
 (cor_mat <- round(cor(conti_data),2))
 ggcorrplot(cor_mat, title = "Correlation Matrix")
+ggcorrplot(cor_mat, title = "Correlation Matrix", hc.order = TRUE, type = "lower", lab = TRUE)
 # highest correlation (0.72): Aggregate_OFFNET_REV & Aggregate_Total_Rev 
 
 # Scatterplot: Aggregate_Total_Rev vs Aggregate_OFFNET_REV 
@@ -92,14 +95,14 @@ g + geom_boxplot(varwidth=T, fill="plum") + coord_cartesian(ylim = c(0,2500))+
        x="Class",
        y="Total Revenue (Rupee)")
 
-# Contigency Table
+# Contingency Table
 addmargins(tab1 <- table(Dataset[,c("aug_user_type", "Class")]))
 prop.table(tab1,1)
 addmargins(tab2 <- table(Dataset[,c("aug_fav_a", "Class")]))
 prop.table(tab2,1)
 
 # Mosaic Plot
-strtab <- structable(aug_fav_a ~ aug_user_type+Class, Dataset)
+(strtab <- structable(aug_fav_a ~ aug_user_type+Class, Dataset))
 mosaic(strtab, shade=TRUE, main = "Mosaic Plot")
 
 # Encode dependent variable (Churned=1, Active=0) 
@@ -113,8 +116,8 @@ set.seed(1)
 trainDataIndex1 <- createDataPartition(Dataset1$Class, p=0.75, list = F)  
 trainData1 <- Dataset1[trainDataIndex1, ]
 testData1 <- Dataset1[-trainDataIndex1, ]
-table(trainData1$Class)
-table(testData1$Class)
+plot(trainData1$Class, main = "Bar Plot of Class for Training Data", col = "#CCCCFF", xlab = "Class of Churn", ylab = "Frequency" , ylim = c(0,800))
+plot(testData1$Class, main = "Bar Plot of Class for Test Data", col = "#CCCCFF", xlab = "Class of Churn", ylab = "Frequency" , ylim = c(0,250))
 
 # Fit logistic model with training dataset
 logitmod1 <- glm(Class ~ ., data = trainData1, family = "binomial")
